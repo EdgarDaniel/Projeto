@@ -14,10 +14,6 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-# ROC CURVE AND AUC SCORE
-from sklearn.metrics import roc_curve
-from sklearn.metrics import roc_auc_score
-
 #IMPORT IMPORTANT FUNCTIONS TO RTX GPU
 from tensorflow.compat.v1 import ConfigProto
 from tensorflow.compat.v1 import InteractiveSession
@@ -29,8 +25,6 @@ import tensorflow.contrib.slim as slim
 from vgg import vgg_16
 
 from time import time
-
-import auc_roc as graphic
 
 from itertools import chain
 
@@ -64,8 +58,7 @@ BATCH_SIZE = 12
 #VARIABLE EPOCH'S NUMBER
 EPOCHS = 5
 
-##!!!!!VARIABLES FOR DISCOVER 
-DROPOUT_PROB = 1
+##!!!!!VARIABLES FOR DISCOVER
 learning_rate = 1e-3
 lr_decay = 0.9
 decay_epochs = 10
@@ -78,8 +71,7 @@ x_inputs = tf.placeholder(tf.float32, shape=x_input_shape)
 y_targets = tf.placeholder(tf.int32, shape=None)
 y_model = tf.placeholder(tf.float32, shape=(None, TOT_CLASSES))
 
-##!!!!VERIFY PLACEHOLDERS 
-dropout_prob = tf.placeholder(tf.float32)
+##!!!!VERIFY PLACEHOLDERS
 generation_num = tf.Variable(0, trainable=False)
 
 #FUNCTION FOR CALCULATE LOST
@@ -180,16 +172,20 @@ def evaluate(VAL_PATH,batch_size):
 		#timeN = time()
 
 		#CALCULATE THE LOSS AND THE RESULTS OF THE NETWORK FOR BATCH
-		t_loss, temp_validation_y = sess.run([loss, model_outputs],feed_dict={x_inputs: val_x, y_targets: val_y, dropout_prob: DROPOUT_PROB})
+		t_loss, temp_validation_y = sess.run([loss, model_outputs],feed_dict={x_inputs: val_x, y_targets: val_y})
 
 		#SAVE RESULTS FOR CALCULATE AUC
 		#Variável para guardar os resultados da rede
-		results.append(temp_validation_y)
-		#Criação das labels e guarda-las na váriavel labelsa
-		label = np.array([0,1]*batch_size)
-		labelsa.append(label)
 
-		#temp_validation_y = sess.run(model_outputs, feed_dict={x_inputs: val_x, dropout_prob: DROPOUT_PROB})
+		for i in range(batch_size):
+			results.append(temp_validation_y[i])
+
+		#Criação das labels e guarda-las na váriavel labelsa
+		label = np.array([[0,1]]*batch_size)
+		for i in range(batch_size):
+			labelsa.append(label[i])
+
+		#temp_validation_y = sess.run(model_outputs, feed_dict={x_inputs: val_x})
 		#print(temp_validation_y)
 
 		#CALCULARE THE ACCURACY FOR BATCH
@@ -204,7 +200,7 @@ def evaluate(VAL_PATH,batch_size):
 		#f.write(str(timeR*1000) + "\n")
 		#f.close()
        
-		#accuracy = sess.run(accuracy_operation, feed_dict={x: val_x, y: val_y})
+		#accuracy = sess.run(accuracy_operation, feed_dict={x: val_x, y: temp_validation_y})
 
 		#VARIABLES THAT SAVE THE VALUES OF ACCURACY AND LOST FOR FINAL GRAPHICS
 		total_accuracy += t_acc
@@ -218,6 +214,7 @@ def evaluate(VAL_PATH,batch_size):
 config = ConfigProto()
 config.gpu_options.allow_growth = True
 session = InteractiveSession(config=config)
+
 
 #CREATE SESSION
 with tf.Session(config=config) as sess:
@@ -263,8 +260,8 @@ with tf.Session(config=config) as sess:
 			Y = np.array([i[1] for i in train])
 		
 			#SESSION RUN
-			sess.run(train_op, feed_dict={x_inputs: X, y_targets: Y, dropout_prob: DROPOUT_PROB})
-			[t_loss, y_out] = sess.run([loss, model_outputs],feed_dict={x_inputs: X, y_targets: Y, dropout_prob: DROPOUT_PROB})
+			sess.run(train_op, feed_dict={x_inputs: X, y_targets: Y})
+			[t_loss, y_out] = sess.run([loss, model_outputs],feed_dict={x_inputs: X, y_targets: Y})
 			t_acc = sess.run(accuracy, feed_dict={y_model: y_out, y_targets: Y})
 
 			#SHOW INFORMATION
@@ -300,61 +297,25 @@ with tf.Session(config=config) as sess:
 		accuracy_validation_data.append(validation_accuracy)
 		loss_validation_data.append(validation_loss)
 
+	#SAVE THE ACCURACY AND LOSS OF TRAIN AND VALITION TO CSV FILES
+	numpy.savetxt("loss_train_data.csv", loss_train_data, delimiter=",")
+	numpy.savetxt("accuracy_train_data.csv",accuracy_train_data,delimiter=",")
+	numpy.savetxt("accuracy_validation_data.csv",accuracy_validation_data,delimiter=",")
+	numpy.savetxt("loss_validation_data.csv",loss_validation_data,delimiter=",")
 
-	#CALCULATE THE AUC VALUE AND FLATTEN THE NP ARRAYS
+	#FLATTEN THE NP ARRAYS OF LABELS AND RESULTS FOR ROC-AUC
 	test4 = np.array(labelsOF).flatten()
 	test5 = np.array(resultsOF).flatten()
+
+	#SAVE THE RESULTS AND LABELS TO CSV FILES
+	numpy.savetxt("labelsOF.csv", test4, delimiter=",")
+	numpy.savetxt("resultsOF.csv", test5, delimiter=",")
 	print(test4)
 	print(test5)
-	auc = roc_auc_score(test4,test5)
-	print("AUC VALUE",auc)
-
-	#CALCULATE THE AUC VALUES
-	fpr, tpr, thresholds = roc_curve(test4, test5)
-
-	#DRAW THE AUC GRAPHIC
-	graphic.plot_roc_curve(fpr,tpr)
-
-	#CREATE LIST OF NUMBER OF EPOCHS COMPUTED
-	eval_indices = range(1, EPOCHS+1)
-
-	#print(eval_indices)
-	#print(loss_data)
-	#print(accuracy_data)
-
-	# DRAW THE ACCURACY GRAPH FOR VALIDATION AND TRAIN
-	plt.clf()
-	plt.subplot(211)
-	plt.plot(eval_indices, accuracy_train_data, 'k--', label='TREINO')
-	plt.plot(eval_indices, accuracy_validation_data, 'g-x', label='VALIDAÇÃO')
-	plt.legend(loc='upper right')
-	plt.xlabel('Épocas')
-	plt.ylabel('ACERTO')
-	plt.grid(which='major', axis='both')
-
-	# DRAW THE LOSS GRAPH FOR VALIDATION AND TRAIN
-
-	plt.subplot(212)
-	#plt.plot(eval_indices, train, 'g-x', label='Train Set Accuracy')
-	plt.plot(eval_indices,loss_train_data, 'r-x', label='TREINO')
-	#plt.plot(eval_indices, np.ones(len(eval_indices))/TOT_CLASSES, 'k--')
-	plt.plot(eval_indices,loss_validation_data,'k--',label='VALIDAÇÃO')
-	plt.legend(loc="upper right")
-	plt.xlabel('Épocas')
-	plt.ylabel('ERRO')
-	plt.ylim(0, 1)
-	plt.grid(which='both', axis='y')
-
-	plt.subplots_adjust(left=0.2, wspace=0.2, hspace=0.3)
-
-	plt.show()
-	plt.pause(0.01)
-
 	
 	#SAVE THE MODEL
 	saver.save(sess, 'VGG16')
 	print("Model saved")
-	plt.savefig('Learning.png')
 
 """
 #FUNTION TO TEST THE SAVED MODEL WITH TEST IMAGES    
@@ -363,28 +324,43 @@ with tf.Session() as sess:
 	saver.restore(sess, tf.train.latest_checkpoint('/home/edgardaniel/Desktop/Linux_LAST_FILES/Desktop/NewModel'))
 	
 	#INITIALIZE VARIABLES FOR BENCHMARK TESTS
-	timeInicial = time()
-	timeFinal = time() - timeInicial
+	#timeInicial = time()
+	#timeFinal = time() - timeInicial
 	
-	cont = 0
+	#cont = 0
 	
 	#WHILE LOOP THAT EXECUTES SEVERAL TIMES THE EVALUATION OF THE IMAGES IN ONE MINUTE
-	while timeFinal <= 60:
+	#while timeFinal <= 60:
 		#EXECUTES THE FUNTION FOR EVALUATE THE NETWORK // INPUT : VARIABLE WITH ALL DATA IMAGES, THE SIZE OF BATCH
-		test_accuracy = evaluate(all_images_test, 30)
+	test_accuracy,test_loss,resultsOF,labelsOF = evaluate(all_images_validation, BATCH_SIZE)
 		
 		#print("Teste Acerto:", test_accuracy)
 		
-		timeFinal = time() - timeInicial
-		cont = cont+1
+		#timeFinal = time() - timeInicial
+		#cont = cont+1
 	#WRITE TIME OF EXECUTATION TO FILE "GENDER_RECONIGTION.txt"
 	
-	f = f = open("GENDER_RECONIGTION.txt", "a")
-	f.write(str(cont) + '\n')
-	f.close()
+	#f = f = open("GENDER_RECONIGTION.txt", "a")
+	#f.write(str(cont) + '\n')
+	#f.close()
 	
+	#FLATTEN THE NP ARRAYS OF LABELS AND RESULTS FOR ROC-AUC
+	#test4 = np.array(labelsOF)
+	#test5 = np.array(resultsOF)
+
+	#SAVE THE RESULTS AND LABELS TO CSV FILES
+
+	#print(test4)
+	#print(test5)
+	labelsOF = np.asarray(labelsOF)
+	resultsOF = np.asarray(resultsOF)
+	print(resultsOF)
+	print(labelsOF)
+	np.savetxt("labelsOF.csv", labelsOF, delimiter=",")
+	np.savetxt("resultsOF.csv", resultsOF, delimiter=",")
+
+
 	#PRINT THE RESULTS TO THE CLI
-	
-	print("Número de Iterações", cont)
+	#print("Número de Iterações", cont)
 	print("Test Accuracy = {:.3f}".format(test_accuracy))
 """
