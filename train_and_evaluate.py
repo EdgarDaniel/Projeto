@@ -13,7 +13,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-# roc curve and auc score
+
+# ROC CURVE AND AUC SCORE
 from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 
@@ -23,6 +24,7 @@ from tensorflow.compat.v1 import InteractiveSession
 
 #IMPORT MODELS DEFINITON FROM TF-SLIM lIGHTWEIGHT HIGH-LEVEL API OF TENSORFLOW
 import tensorflow.contrib.slim as slim
+
 #IMPORT VGG16 MODEL
 from vgg import vgg_16
 
@@ -36,12 +38,11 @@ from itertools import chain
 ##from inception_resnet_v2 import inception_resnet_v2, inception_resnet_v2_arg_scope
 
 
-#TEST_DIR = '/home/edgardaniel/Desktop/Linux_LAST_FILES/Desktop/Teste'
 
 #VARIABLES WITH PATH FOR IMAGES TRAIN/VALIDATION/TEST
 TRAIN_DIR = '/home/edgardaniel/Downloads/train'
 VAL_DIR = '/home/edgardaniel/Downloads/validation'
-#TEST_DIR = '/home/edgardaniel/Downloads/test'
+TEST_DIR = '/home/edgardaniel/Downloads/test'
 
 # THE PATH FOR ALL THE TRAIN,VAL AND TEST DATA TO LAB COMPUTER
 
@@ -77,7 +78,8 @@ decay_epochs = 10
 #PLACEHOLDER'S FOR IMAGE
 x_input_shape = (None, HEIGHT_IMGS, WIDTH_IMGS, DEPTH_IMGS)
 x_inputs = tf.placeholder(tf.float32, shape=x_input_shape)
-#PLACEHOLDER'S FOR LABLES 
+
+#PLACEHOLDER'S FOR LABLES
 y_targets = tf.placeholder(tf.int32, shape=None)
 y_model = tf.placeholder(tf.float32, shape=(None, TOT_CLASSES))
 
@@ -134,13 +136,13 @@ accuracy = accuracy_of_batch(y_model, y_targets)
 #CREATE A LIST OF TUPLES WITH THE FIRST POSITION THE PATH TO THE IMAGE AND THE SECOND POSITION THE LABEL
 all_images_train = list_all_data(TRAIN_DIR)
 all_images_validation = list_all_data(VAL_DIR)
-#all_images_test = list_all_data(TEST_DIR)
+all_images_test = list_all_data(TEST_DIR)
 
 
 #SHUFFLE ALL PATH IMAGES FOR RANDOMIZES THE DATA
 shuffle(all_images_train)
 shuffle(all_images_validation)
-#shuffle(all_images_test)
+shuffle(all_images_test)
 
 #CREATE PLT
 plt.ion()
@@ -151,6 +153,7 @@ saver = tf.train.Saver()
 #IMPLEMENTATION OF FUNCTION THAT READS THE BATCHES AND CALCULATE THE ACCURACY
 def evaluate(VAL_PATH,batch_size):
 
+	#VARIABLES FOR CONTROL
 	num_examples = int (len(VAL_PATH)/batch_size)
 	total_accuracy = 0
 	total_loss = 0
@@ -162,8 +165,8 @@ def evaluate(VAL_PATH,batch_size):
 	sess = tf.get_default_session()
 
 	for j in range(num_examples):
-		#LOAD BATCH OF DATA
 
+		#LOAD BATCH OF DATA
 		val,cont = create_data(VAL_PATH,batch_size,cont_images)
 		
 		#VARIABLE THAT CONTROLS THE PROGRESSION OF IMAGES READ
@@ -178,21 +181,27 @@ def evaluate(VAL_PATH,batch_size):
 		#LABELS
 		val_y = np.array([i[1] for i in val])
 
+		#INITIALIZE VARIABLE FOR CONTROL OF TIME OF BENCHMARKS
 		#timeN = time()
 
-		#CALCULATE THE ACCURACY FOR BATCH
+		#CALCULATE THE LOSS AND THE RESULTS OF THE NETWORK FOR BATCH
 		t_loss, temp_validation_y = sess.run([loss, model_outputs],feed_dict={x_inputs: val_x, y_targets: val_y, dropout_prob: DROPOUT_PROB})
 
-
+		#SAVE RESULTS FOR CALCULATE AUC
+		#Variável para guardar os resultados da rede
 		results.append(temp_validation_y)
+		#Criação das labels e guarda-las na váriavel labelsa
 		label = np.array([0,1]*batch_size)
 		labelsa.append(label)
 
 		#temp_validation_y = sess.run(model_outputs, feed_dict={x_inputs: val_x, dropout_prob: DROPOUT_PROB})
 		#print(temp_validation_y)
+
+		#CALCULARE THE ACCURACY FOR BATCH
 		t_acc = sess.run(accuracy,feed_dict={y_model: temp_validation_y, y_targets: val_y})
 
 
+		#FUNCTIONS TO CALCULATE TIME TO BENCHMARKS
 		#timeF = time()
 		#timeR = timeF - timeN
 
@@ -201,6 +210,8 @@ def evaluate(VAL_PATH,batch_size):
 		#f.close()
        
 		#accuracy = sess.run(accuracy_operation, feed_dict={x: val_x, y: val_y})
+
+		#VARIABLES THAT SAVE THE VALUES OF ACCURACY AND LOST FOR FINAL GRAPHICS
 		total_accuracy += t_acc
 		total_loss += t_loss
 
@@ -221,11 +232,13 @@ with tf.Session(config=config) as sess:
 	loss_epoch = []
 	train_epoch = []
 
+	#INITIALIZE VARIABLES THAT SAVE THE DATA TO GRAPHICS OF PERFORMANCE
 	accuracy_train_data = []
 	loss_train_data = []
 	accuracy_validation_data= []
 	loss_validation_data = []
 
+	#INITIALIZE VARIABLES THAT SAVE THE DATA TO AUC GRAPHIC
 	labelsOF = []
 	resultsOF = []
 
@@ -269,6 +282,7 @@ with tf.Session(config=config) as sess:
 		accuracy_final = sum(train_epoch) / len(train_epoch)
 		validation_accuracy,validation_loss,resultO,labelsO = evaluate(all_images_validation,BATCH_SIZE)
 
+		#SAVE ALL THE RESULTS AND LABELS OF EACH EPOCH TO THE AUC GRAPHIC
 		resultsOF.append(resultO)
 		labelsOF.append(labelsO)
 
@@ -286,21 +300,28 @@ with tf.Session(config=config) as sess:
 		loss_validation_data.append(validation_loss)
 
 
+	#CALCULATE THE AUC VALUE AND FLATTEN THE NP ARRAYS
 	test4 = np.array(labelsOF).flatten()
 	test5 = np.array(resultsOF).flatten()
 	print(test4)
 	print(test5)
 	auc = roc_auc_score(test4,test5)
-	print(auc)
+	print("AUC VALUE",auc)
 
+	#CALCULATE THE AUC VALUES
 	fpr, tpr, thresholds = roc_curve(test4, test5)
 
+	#DRAW THE AUC GRAPHIC
 	graphic.plot_roc_curve(fpr,tpr)
 
+	#CREATE LIST OF NUMBER OF EPOCHS COMPUTED
 	eval_indices = range(1, EPOCHS+1)
+
 	#print(eval_indices)
 	#print(loss_data)
 	#print(accuracy_data)
+
+	# DRAW THE ACCURACY GRAPH FOR VALIDATION AND TRAIN
 
 	plt.clf()
 	plt.subplot(211)
@@ -311,6 +332,7 @@ with tf.Session(config=config) as sess:
 	plt.ylabel('ACERTO')
 	plt.grid(which='major', axis='both')
 
+	# DRAW THE LOSS GRAPH FOR VALIDATION AND TRAIN
 
 	plt.subplot(212)
 	#plt.plot(eval_indices, train, 'g-x', label='Train Set Accuracy')
@@ -337,18 +359,32 @@ with tf.Session(config=config) as sess:
 """
 #FUNTION TO TEST THE SAVED MODEL WITH TEST IMAGES    
 with tf.Session() as sess:
+	#RESTORE NEW SESSION
 	saver.restore(sess, tf.train.latest_checkpoint('/home/edgardaniel/Desktop/Linux_LAST_FILES/Desktop/NewModel'))
+	
+	#INITIALIZE VARIABLES FOR BENCHMARK TESTS
 	timeInicial = time()
 	timeFinal = time() - timeInicial
+	
 	cont = 0
+	
+	#WHILE LOOP THAT EXECUTES SEVERAL TIMES THE EVALUATION OF THE IMAGES IN ONE MINUTE
 	while timeFinal <= 60:
+		#EXECUTES THE FUNTION FOR EVALUATE THE NETWORK // INPUT : VARIABLE WITH ALL DATA IMAGES, THE SIZE OF BATCH
 		test_accuracy = evaluate(all_images_test, 30)
+		
 		#print("Teste Acerto:", test_accuracy)
+		
 		timeFinal = time() - timeInicial
 		cont = cont+1
+	#WRITE TIME OF EXECUTATION TO FILE "GENDER_RECONIGTION.txt"
+	
 	f = f = open("GENDER_RECONIGTION.txt", "a")
 	f.write(str(cont) + '\n')
 	f.close()
+	
+	#PRINT THE RESULTS TO THE CLI
+	
 	print("Número de Iterações", cont)
 	print("Test Accuracy = {:.3f}".format(test_accuracy))
 """
