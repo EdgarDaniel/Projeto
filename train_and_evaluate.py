@@ -44,11 +44,6 @@ TRAIN_DIR = '/home/edgardaniel/Downloads/train'
 VAL_DIR = '/home/edgardaniel/Downloads/validation'
 TEST_DIR = '/home/edgardaniel/Downloads/test'
 
-# THE PATH FOR ALL THE TRAIN,VAL AND TEST DATA TO LAB COMPUTER
-
-#TRAIN_DIR = '/home/jcneves/Desktop/NEW CODE/ModelF/train'
-#VAL_DIR = '/home/jcneves/Desktop/NEW CODE/ModelF/validation'
-#TEST_DIR = '/home/jcneves/Desktop/NEW CODE/ModelF/test'
 
 #VARIABLE WITH NUMBER OF CLASSES 
 TOT_CLASSES = 2
@@ -227,7 +222,9 @@ session = InteractiveSession(config=config)
 #CREATE SESSION
 with tf.Session(config=config) as sess:
 	sess.run(tf.global_variables_initializer())
-    	
+
+	#CALCULATE THE NUMBER OF ITERATIONS DIVIDE THE NUMBER OF ALL IMAGES ON
+	#TRAIN DATASET FOR THE NUMBER OF IMAGES BATCH SIZE
 	num_iteration = int (len(all_images_train) / BATCH_SIZE)
 	loss_epoch = []
 	train_epoch = []
@@ -250,17 +247,19 @@ with tf.Session(config=config) as sess:
 
 		for j in range(num_iteration):
 
+			#LOAD THE IMAGES OF DATA WITH THE SIZE OF BATCH_SIZE AND RETURN THE IMAGES AND THE COUNT NUMBER FOR LOAD THE
+			#NEXT IMAGES FOR DIFERENTE BATCHES
 			train,res1= create_data(all_images_train,BATCH_SIZE,value1)
 			value1 = res1
 			num_batch = num_batch +1
 
-			#FEATURES
+			#EXTRACT FEATURES
 			X = np.array([i[0] for i in train])
 
 			#NORMALIZED THE DATA
 			X = X/255
 			
-			#LABELS
+			#EXTRACT LABELS
 			Y = np.array([i[1] for i in train])
 		
 			#SESSION RUN
@@ -270,7 +269,8 @@ with tf.Session(config=config) as sess:
 
 			#SHOW INFORMATION
 			#print("TRAINING STEP CONCLUDED numb_batch:{},batch_num:{}, loss:{}, accuracy:{}".format(num_batch,num_iteration,t_loss,t_acc))
-		
+
+			#APPEND THE INFORMATION ABOUT THE ACCURACY AND LOSS OF EACH BATCH
 			loss_epoch.append(t_loss)
 			train_epoch.append(t_acc)
 
@@ -286,14 +286,15 @@ with tf.Session(config=config) as sess:
 		resultsOF.append(resultO)
 		labelsOF.append(labelsO)
 
-		#LOG INFORMATION ABOUT EACH BATCH
+		#LOG INFORMATION ABOUT EACH EPOCH
 		print("EPOCH = {}" .format(i+1))
 		print("Validation Accuracy = {:.3f}".format(validation_accuracy))
 		print("Validation Loss = {:.3f}".format(validation_loss))
 		print("Accuracy = {}".format(accuracy_final))
 		print("Loss = {}" .format(loss_final))
 		print()
-		
+
+		#APPEND ALL DATA ABOUT THE ACCURACY AND LOSS OF EACH EPOCH
 		loss_train_data.append(loss_final)
 		accuracy_train_data.append(accuracy_final)
 		accuracy_validation_data.append(validation_accuracy)
@@ -322,7 +323,6 @@ with tf.Session(config=config) as sess:
 	#print(accuracy_data)
 
 	# DRAW THE ACCURACY GRAPH FOR VALIDATION AND TRAIN
-
 	plt.clf()
 	plt.subplot(211)
 	plt.plot(eval_indices, accuracy_train_data, 'k--', label='TREINO')
