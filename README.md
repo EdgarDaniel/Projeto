@@ -9,5 +9,6 @@ Neste repositório está presente uma pasta com o nome "NETWORK FILES" que guard
 
 Juntamente com todos os comentários existentes nos scripts e com algumas das informações dadas em seguida, irá tornar-se fácil entender toda a implementação do código.
 
+""POR COMPLETAR""
 
-
+O resto de toda a informação está comentada no ficheiro train_and_evaluate.py e em qualquer dúvida contacte o criador através do email: Edgar_Daniel_60@hotmail.com
