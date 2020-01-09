@@ -1,0 +1,1 @@
+python freeze_graph.py --model_dir '/home/edgardaniel/Desktop/NewModel' --output_node_names model_definition/vgg_16/fc8/BiasAdd
