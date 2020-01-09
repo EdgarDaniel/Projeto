@@ -168,6 +168,7 @@ def evaluate(VAL_PATH,batch_size):
 		#LABELS
 		val_y = np.array([i[1] for i in val])
 
+
 		#INITIALIZE VARIABLE FOR CONTROL OF TIME OF BENCHMARKS
 		#timeN = time()
 
@@ -175,15 +176,14 @@ def evaluate(VAL_PATH,batch_size):
 		t_loss, temp_validation_y = sess.run([loss, model_outputs],feed_dict={x_inputs: val_x, y_targets: val_y})
 
 		#SAVE RESULTS FOR CALCULATE AUC
-		#Variável para guardar os resultados da rede
-
+		#CREATES THE VARIABLE THAT STORES THE PROBABILIST OF THE NETWORK
 		for i in range(batch_size):
 			results.append(temp_validation_y[i])
 
-		#Criação das labels e guarda-las na váriavel labelsa
-		label = np.array([[0,1]]*batch_size)
+		#CREATES THE VARIABLE THAT STORES THE LABELS
+		#label = np.array([[0,1]]*batch_size)
 		for i in range(batch_size):
-			labelsa.append(label[i])
+			labelsa.append(val_y[i])
 
 		#temp_validation_y = sess.run(model_outputs, feed_dict={x_inputs: val_x})
 		#print(temp_validation_y)
