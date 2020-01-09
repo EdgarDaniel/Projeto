@@ -1,4 +1,11 @@
 #coding=utf-8
+#COPYRIGHT EDGAR DANIEL
+#THIS IS THE MAIN SCRIPT FOR TRAIN THE VGG16 NETWORK FOR GENDER RECOGNITION
+#THIS TRAIN USES BATCHES AND EPOCHS FOR OPTIMIZATION
+#IN THE END OF EACH EPOCH THE EVALUATE FUNCTION RUNS ALL THE VALIDATION DATASET TO METRICS
+#IN COMMENT ARE FUNCTIONS THAT CALCULATES THE TIME EXECUTION FOR BENCHMARK TESTS
+#THE LAST FUNCTION IN THIS FILE RELOAD THE CHECKPOINT FILE FROM THE SAVED NETWORK AND EXECUTES VALIDATION AND
+#TEST DATASETS.
 
 from __future__ import absolute_import
 from __future__ import division
@@ -31,8 +38,6 @@ from itertools import chain
 ##!!!!REMOVE BEFORE GIT
 ##from inception_resnet_v2 import inception_resnet_v2, inception_resnet_v2_arg_scope
 
-
-
 #VARIABLES WITH PATH FOR IMAGES TRAIN/VALIDATION/TEST
 TRAIN_DIR = '/home/edgardaniel/Downloads/train'
 VAL_DIR = '/home/edgardaniel/Downloads/validation'
@@ -58,7 +63,7 @@ BATCH_SIZE = 12
 #VARIABLE EPOCH'S NUMBER
 EPOCHS = 5
 
-##!!!!!VARIABLES FOR DISCOVER
+##!!!!!VARIABLES FOR DISCOVER FOR THE REPORT
 learning_rate = 1e-3
 lr_decay = 0.9
 decay_epochs = 10
@@ -107,7 +112,7 @@ def accuracy_of_batch(logits, targets):
 with tf.variable_scope('model_definition') as scope:
 
 	model_outputs, end_points = vgg_16(x_inputs,TOT_CLASSES)
-	print(end_points)
+	#print(end_points)
 	scope.reuse_variables()
 
 #LOSS OPERATION
@@ -169,7 +174,7 @@ def evaluate(VAL_PATH,batch_size):
 		val_y = np.array([i[1] for i in val])
 
 
-		#INITIALIZE VARIABLE FOR CONTROL OF TIME OF BENCHMARKS
+		#INITIALIZE VARIABLE FOR CONTROL OF TIME FOR BENCHMARKS
 		#timeN = time()
 
 		#CALCULATE THE LOSS AND THE RESULTS OF THE NETWORK FOR BATCH
@@ -271,8 +276,6 @@ with tf.Session(config=config) as sess:
 			loss_epoch.append(t_loss)
 			train_epoch.append(t_acc)
 
-			#print(loss_epoch)
-			#print(train_epoch)
 
 		#CAlCULATE THE LOSS AND ACCURACY IN THE END OF EACH EPOCH
 		loss_final = sum(loss_epoch) / len(loss_epoch)
@@ -303,64 +306,63 @@ with tf.Session(config=config) as sess:
 	numpy.savetxt("accuracy_validation_data.csv",accuracy_validation_data,delimiter=",")
 	numpy.savetxt("loss_validation_data.csv",loss_validation_data,delimiter=",")
 
-	#FLATTEN THE NP ARRAYS OF LABELS AND RESULTS FOR ROC-AUC
-	test4 = np.array(labelsOF).flatten()
-	test5 = np.array(resultsOF).flatten()
+	#!!! CAUTION, THIS RESULTS AND LABELS STORES THE INFORMATION ABOUT ALL THE EPOCHS
+	#MAKE THE LISTS OF LABELS AND RESULTS IN NUMPY ARRAYS
+	resultsOF = np.asarray(resultsOF)
+	labelsOF = np.asarray(labelsOF)
 
 	#SAVE THE RESULTS AND LABELS TO CSV FILES
-	numpy.savetxt("labelsOF.csv", test4, delimiter=",")
-	numpy.savetxt("resultsOF.csv", test5, delimiter=",")
-	print(test4)
-	print(test5)
+	numpy.savetxt("labelsOF.csv",labelsOF, delimiter=",")
+	numpy.savetxt("resultsOF.csv",resultsOF, delimiter=",")
 	
 	#SAVE THE MODEL
 	saver.save(sess, 'VGG16')
 	print("Model saved")
 
 """
-#FUNTION TO TEST THE SAVED MODEL WITH TEST IMAGES    
+#FUNTION TO TEST THE SAVED MODEL WITH VALITION OR TEST IMAGES    
 with tf.Session() as sess:
+	
 	#RESTORE NEW SESSION
 	saver.restore(sess, tf.train.latest_checkpoint('/home/edgardaniel/Desktop/Linux_LAST_FILES/Desktop/NewModel'))
 	
 	#INITIALIZE VARIABLES FOR BENCHMARK TESTS
 	#timeInicial = time()
 	#timeFinal = time() - timeInicial
-	
+
+	#VARIABEL THAT CONTROLS THE NUMBER OF ITERATIONS
 	#cont = 0
 	
 	#WHILE LOOP THAT EXECUTES SEVERAL TIMES THE EVALUATION OF THE IMAGES IN ONE MINUTE
 	#while timeFinal <= 60:
+
 		#EXECUTES THE FUNTION FOR EVALUATE THE NETWORK // INPUT : VARIABLE WITH ALL DATA IMAGES, THE SIZE OF BATCH
 	test_accuracy,test_loss,resultsOF,labelsOF = evaluate(all_images_validation, BATCH_SIZE)
-		
-		#print("Teste Acerto:", test_accuracy)
-		
+
+		#CALCULATES THE EXECUTION TIME
 		#timeFinal = time() - timeInicial
 		#cont = cont+1
-	#WRITE TIME OF EXECUTATION TO FILE "GENDER_RECONIGTION.txt"
-	
+
+	#WRITE TIME OF EXECUTION TO FILE "GENDER_RECONIGTION.txt"
 	#f = f = open("GENDER_RECONIGTION.txt", "a")
 	#f.write(str(cont) + '\n')
 	#f.close()
 	
-	#FLATTEN THE NP ARRAYS OF LABELS AND RESULTS FOR ROC-AUC
-	#test4 = np.array(labelsOF)
-	#test5 = np.array(resultsOF)
-
-	#SAVE THE RESULTS AND LABELS TO CSV FILES
-
-	#print(test4)
-	#print(test5)
+	#TURN THE LIST OF RESULT AND LABELS IN NUMPY ARRAYS
 	labelsOF = np.asarray(labelsOF)
 	resultsOF = np.asarray(resultsOF)
-	print(resultsOF)
-	print(labelsOF)
+
+	#print(resultsOF)
+	#print(labelsOF)
+
+	#SAVES THE RESULTS AND LABELS FROM THE VALIDATION DATASET IN FILES
 	np.savetxt("labelsOF.csv", labelsOF, delimiter=",")
 	np.savetxt("resultsOF.csv", resultsOF, delimiter=",")
 
 
 	#PRINT THE RESULTS TO THE CLI
 	#print("Número de Iterações", cont)
+
+	#PRINT THE ACCURACY NUMBER FOR THE VALIDATION DATASET IN THE CLI
 	print("Test Accuracy = {:.3f}".format(test_accuracy))
 """
