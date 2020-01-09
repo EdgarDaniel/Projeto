@@ -1,13 +1,6 @@
-# Projeto
-Neural Compute Stick (BenchMarks)
 
-Este projeto está relacionado com a nova tecnologia lançada pela Intel, que tem como objetivo tornar possível a inferência de modelos de deep learning na edge, em dispositivos de pequeno porte e com baixo consumo energético.
 
-A solução proposta pela Movidius, uma das empresa da Intel foi a criação de uma pen denominada de NCS(Neural Compute Stick) que promete cumprir com todos os objetivos enunciados anteriormente.
-
-Neste repositório está presente os scripts que permitiram criar os benchmarks que serão apresentados no relatório, a topologia da rede vgg16, um script que tem como objetivo realizar o treino da rede para o reconhecimento de género através de batch, funções auxiliares para ler os dados através de paths que terão que ser especificados no ficheiro train_and_evaluate.py e por um fim um último script para realizar o grafico ROC e calculo do valor AUC.
-
-Juntamente com todos os comentários existentes nos scripts e com algumas das informações dadas em seguida, irá tornar-se fácil entender toda a implementação do código.
+# PASTA COM IMPLEMENTAÇÕES DE CODIGO DA REDE E METRICAS
 
 O script principal é o train_and_evaluate.py, este deve ser executado com ajuda do comando python3:
 
