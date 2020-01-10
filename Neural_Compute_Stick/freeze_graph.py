@@ -1,4 +1,8 @@
 
+#THIS SCRIPT BELONGS TO THE TOOLS FROM THE GIT REPOSITORY : https://github.com/tensorflow/tensorflow.git
+#THE ONE CHANGE IS THE PRINT FUNCTION THAT ITERATES ALL THE NODES ON THE GRAPH
+#THIS IS USE FOR SPECIFY THE OUTPUT NODE OF THE NETWORK IF THE USER DON'T KNOW IT.
+
 import os, argparse
 
 import tensorflow as tf
@@ -31,6 +35,8 @@ def freeze_graph(model_dir, output_node_names):
     
     # We precise the file fullname of our freezed graph
     absolute_model_dir = "/".join(input_checkpoint.split('/')[:-1])
+
+    #VARIBLE THAT STORES THE NAME FOR THE FILE WITH THE FROZEN GRAPH
     output_graph = absolute_model_dir + "/frozen_model.pb"
 
     # We clear devices to allow TensorFlow to control on which device it will load operations
@@ -43,7 +49,8 @@ def freeze_graph(model_dir, output_node_names):
 
         # We restore the weights
         saver.restore(sess, input_checkpoint)
-        
+
+        # PRINT ALL THE NAMES OF THE LAYERS OF THE NETWORK
         [print(n.name) for n in tf.get_default_graph().as_graph_def().node]
 
         # We use a built-in TF helper to export variables to constants
@@ -60,6 +67,7 @@ def freeze_graph(model_dir, output_node_names):
     return output_graph_def
 
 if __name__ == '__main__':
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_dir", type=str, default="", help="Model folder to export")
     parser.add_argument("--output_node_names", type=str, default="", help="The name of the output nodes, comma separated.")

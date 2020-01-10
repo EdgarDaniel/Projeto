@@ -1,1 +1,0 @@
-python mo.py --input_model '/home/edgardaniel/Desktop/NewModel/frozen_model.pb' --input_shape [1,224,224,3]
