@@ -1,4 +1,6 @@
-#PROJETO
+#COPYRIGHT EDGAR DANIEL
+#SCRIP THAT ALLOWS THE INTEGRATION OF THE API (INFERENCE ENGINE)
+#IN COMMENT ARE THE CODE TO CALCULATE THE BENCHMARKS AND WRITE THE RESULTS TO A FILE
 
 from argparse import ArgumentParser, SUPPRESS
 import sys
@@ -9,7 +11,7 @@ from time import time
 import logging as log
 from openvino.inference_engine import IENetwork, IECore
 
-
+#FUNCTION THAT PARSES THE ARGUMENTS THAT BELONGS TO THE EXAMPLES IN THE OPENVINO TOOLKIT
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
@@ -33,10 +35,8 @@ def build_argparser():
     args.add_argument("--nthreads", help="Optional.Number of threads to execute model", default=4, type=int)
     return parser
 
-
+#MAIN FUNCTION
 def main():
-    
-
 
     #SEPARAÇÃO DE ARGUMENTOS
     args = build_argparser().parse_args()
@@ -49,7 +49,7 @@ def main():
     model_xml = args.model
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
 
-    #INSTANCIAR CLASSE CORRESPONDE AO INFERENCE ENGINE PARA UM ESPECIFÍCO DISPOSITIVO
+    #INSTANCIAR CLASSE CORRESPONDENTE AO INFERENCE ENGINE PARA UM ESPECIFÍCO DISPOSITIVO
     log.info("A criar inference engine")
     ie = IECore()
 
@@ -87,34 +87,37 @@ def main():
     #COMEÇA INFERÊNCIA EM MODO SÍNCRONO
     log.info("Começa a inferência em modo síncrono")
 
+
     #CALCULO DO TEMPO
-    timeInicial = time()
-    timeFinal = time() - timeInicial
-    cont = 0
-    while timeFinal <= 60:
-        timeN = time()
-        res = exec_net.infer(inputs={input_blob:images})
-        timeE = time()
-        timeF = ((timeE - timeN) * 1000)
+    #timeInicial = time()
+    #timeFinal = time() - timeInicial
+    #cont = 0
+    #while timeFinal <= 60:
+        #timeN = time()
+    res = exec_net.infer(inputs={input_blob:images})
+        #timeE = time()
+        #timeF = ((timeE - timeN) * 1000)
         
         #ESCREVER TEMPO DE INFERÊNCIA PARA FICHEIRO
-        f.write(str(timeF) + "\n")
+        #f.write(str(timeF) + "\n")
 
-        timeFinal = time() - timeInicial
-        cont = cont +1
+        #timeFinal = time() - timeInicial
+        #cont = cont +1
         #print(timeF)
 
-    print("Número de iterações em 60s:", cont)
-    f.write(str(cont) + "\n")
+    #print("Número de iterações em 60s:", cont)
+    #f.write(str(cont) + "\n")
 
     #FECHAR FICHEIRO
-    f.close()
+    #f.close()
     #PROCESSAR SHAPE DE SAÍDA
 
+    #PREPARA OS RESULTADOS PARA SEREM ANALISADOS
     log.info("Processar shape de saída")
     res = res[out_blob]
     #print("Resultados",res)
 
+    #CRIAÇÃO DOS RESULTADOS ATRAVÉS DAS LABELS E PROBABILIDADES RESULTANTES DA REDE
     if args.labels:
         with open(args.labels, 'r') as f:
             labels_map = [x.split(sep=' ', maxsplit=1)[-1].strip() for x in f]
@@ -154,8 +157,10 @@ def main():
     contT = contM + contF
     #print(contT)
     #print(n)
+    #APRESENTA A TAXA DE ACERTO PARA O BATCH SIZE NA LINHA DE COMANDOS
     print("Taxa de Acerto", (contT/n)*100, "%")
 
+#CHAMA A FUNÇÃO PRINCIPAL
 if __name__ == '__main__':
     sys.exit(main() or 0)
 

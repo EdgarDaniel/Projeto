@@ -18,8 +18,12 @@ No caso de apresentar erros sugiro que corra o script "install_prerequisites_tf.
 "pip3 install networkx==2.3.0".
 É necessário que ambas as pastas, "mo" e "extensions" estejam na mesma pasta quando executa o script, porque este depende de bibliotecas presentes em ambos.
 
-Em relação aos parâmetros utilizados para a execução deste comando, está o "--input_model" que diz respeito ao caminho onde existe o ficheiro resultante da execução do script "freeze_graph.py", (Em norma está dentro da pasta onde guardou o chekpoint do modelo e os ficheiros que lhe estão relacionados) e o "--input_shape" que especifica as dimensões das imagens, o número de batch size e o tipo de cores utilizado, neste caso RGB o que implica a presença do número 3.
+Em relação aos parâmetros utilizados para a execução deste comando, está o "--input_model" que diz respeito ao caminho onde existe o ficheiro resultante da execução do script "freeze_graph.py", (Em norma está dentro da pasta onde guardou o chekpoint do modelo e os ficheiros que lhe estão relacionados) e o "--input_shape" que especifica as dimensões das imagens, o número de batch size e o tipo de cores utilizado, neste caso RGB, o que implica a presença do número 3.
 
-Depois de todos os passos anteriores executados com suceso terá no seu dispositivo 3 ficheiros resultantes do ultimo script executado que diz respeito ao modelo convertido e pronto para executar em cpu ou na neural compute stick.
+Depois de todos os passos anteriores executados com sucesso terá no seu dispositivo 3 ficheiros resultantes do ultimo script que diz respeito ao modelo convertido e pronto para executar em cpu ou na neural compute stick.
 
-!! POR COMPLETAR COM OS DADOS DO ULTIMO SCRIPT
+O script "Programa_Final.py" permite o carregamento do modelo através dos dois ficheiros, binário e xml, e para executar é necessário o comando:
+
+	 python3 Programa_Final.py -m '/home/edgardaniel/Desktop/frozen_model.xml' -i '/home/edgardaniel/Desktop/162771.jpg' -d CPU
+
+Os parâmetros são "-m" que indica o ficheiro que guarda toda a topologia da rede em formato xml, o "-i" que espera o caminho para a imagem ou imagens de entrada para a inferência, e por fim o "-d" que especifica qual o hardware o utilizador pretende utilizar para o processamento, este pode ser "CPU" (Unidade de Processamento do Dispositivo) ou "MYRIAD" que realiza a inferência na neural compute stick.
