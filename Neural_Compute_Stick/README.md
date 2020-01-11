@@ -27,4 +27,4 @@ O script "Programa_Final.py" permite o carregamento do modelo através dos dois 
 	 python3 Programa_Final.py -m '/home/edgardaniel/Desktop/frozen_model.xml' -i '/home/edgardaniel/Desktop/162771.jpg' -d CPU
 
 Os parâmetros são "-m" que indica o ficheiro que guarda toda a topologia da rede em formato xml, o "-i" que espera o caminho para a imagem ou imagens de entrada para a inferência, e por fim o "-d" que especifica qual o hardware o utilizador pretende utilizar para o processamento, este pode ser "CPU" (Unidade de Processamento do Dispositivo) ou "MYRIAD" que realiza a inferência na neural compute stick.
-!!NOTA : No caso de necessitar de usar mais que uma imagem para inferência, utilize o separador "," para separar os caminhos para cada uma das imagens.
+!!NOTA : No caso de necessitar de usar mais que uma imagem para inferência, utilize o separador "," para indicar cada uma das imagens.
