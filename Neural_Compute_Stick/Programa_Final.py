@@ -42,8 +42,8 @@ def main():
     args = build_argparser().parse_args()
 
     # CRIAÇÃO DE OBJETO FILE
-    nome = "Gender_Recognition" + args.device + ".txt"
-    f = open(nome, "a")
+    #nome = "Gender_Recognition" + args.device + ".txt"
+    #f = open(nome, "a")
 
     #CARREGAR MODELOS (FICHIEROS XML E BIN)
     model_xml = args.model
