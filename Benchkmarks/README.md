@@ -4,7 +4,7 @@ Primeiro, podemos falar sobre o conteúdo da diretoria “Aplicação BenchMark�
 
 Depois deve compilar todos os exemplos através do srcipt “build_samples.bat”. O resultado desta execução é a criação de uma pasta com todos os exemplos compilados e já prontos a executar na diretoria: "C:\Users\EdgarDaniel\Documents\Intel\OpenVINO\inference_engine_samples_build\intel64\Release”.
 
-Uma vez que para a correta execução do aplicativo é necessário ter presente bibliotecas dependentes, está presente nesta seção também uma diretoria chamada “Bibiliotecas Importantes”. O aplicativo em vez de ser executado dentro da pasta onde foi criado, deve ser copiado para dentro desta pasta e nesse caso já terá todas as dependências necessárias.
+Uma vez que para a correta execução do aplicativo é necessário ter presente bibliotecas dependentes, está presente nesta seção também uma diretoria chamada “Bibiliotecas Importantes”. O aplicativo em vez de ser executado dentro da pasta onde foi criado, deve ser copiado para dentro desta pasta e nesse caso já terá todas as dependências necessárias. Neste caso a aplicação que foi utilizada no processo já está compilada dentro da pasta das bibliotecas, só é preciso executar a aplicação.
 
 Como para executar o aplicativo é necessário uma rede, imagens e conhecimentos acerca de alguns parametros para inserir no comando do terminal, a pasta “Modelos Selecioandos” tem todos os modelos compativies com a unidade de processamento e com a (NCS). Estes modelos já estão convertidos e já têm as imagens utilizadas na realização dos testes de forma a proporcionar resultados o mais semelhantes possiveis.
 
